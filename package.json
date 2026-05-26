@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "postinstall": "find node_modules/react-native/scripts -name '*.sh' -exec chmod +x {} \\; 2>/dev/null || true"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
