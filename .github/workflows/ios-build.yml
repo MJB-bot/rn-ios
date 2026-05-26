@@ -32,15 +32,24 @@ jobs:
       - name: Build archive
         run: |
           cd ios
+          echo "=== Workspace files ==="
+          find . -maxdepth 1 -name '*.xcworkspace'
+          echo "=== Available schemes ==="
+          xcodebuild -list -workspace "$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)" -json 2>/dev/null | python3 -c "import sys,json; data=json.load(sys.stdin); [print(s) for s in data['workspace']['schemes']]"
+          echo "=== Building ==="
+          WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
+          SCHEME="$(xcodebuild -list -workspace "$WORKSPACE" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")"
+          echo "Workspace: $WORKSPACE"
+          echo "Scheme: $SCHEME"
           xcodebuild archive \
-            -workspace "$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)" \
-            -scheme "$(xcodebuild -list -workspace "$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")" \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
             -configuration Release \
             -archivePath ../ios.xcarchive \
             -sdk iphoneos \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tail -50
 
       - name: Package IPA
         run: |
