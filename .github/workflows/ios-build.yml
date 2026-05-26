@@ -35,6 +35,7 @@ jobs:
       - name: Build archive
         run: |
           cd ios
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
           WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
           SCHEME="$(xcodebuild -list -workspace "$WORKSPACE" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")"
           echo "Workspace: $WORKSPACE, Scheme: $SCHEME"
@@ -45,6 +46,7 @@ jobs:
             -configuration Release \
             -archivePath ../ios.xcarchive \
             -sdk iphoneos \
+            -UseModernBuildSystem=NO \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO 2>&1 | tee xcodebuild.log | grep -E "(error:|Error |FAILED|BUILD FAILED)" | head -20
           XCODE_EXIT=${PIPESTATUS[0]}
