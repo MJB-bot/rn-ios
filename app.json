@@ -19,7 +19,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.company.enterpriseapp",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
