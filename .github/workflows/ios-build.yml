@@ -48,13 +48,9 @@ jobs:
             -sdk iphoneos \
             -UseModernBuildSystem=NO \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO 2>&1 | tee xcodebuild.log | grep -E "(error:|Error |FAILED|BUILD FAILED)" | head -20
+            CODE_SIGNING_REQUIRED=NO 2>&1 | tee xcodebuild.log | tail -60
           XCODE_EXIT=${PIPESTATUS[0]}
           echo "=== xcodebuild exit: $XCODE_EXIT ==="
-          if [ "$XCODE_EXIT" -ne 0 ]; then
-            echo "=== Last 50 lines of full log ==="
-            tail -50 xcodebuild.log
-          fi
 
       - name: Debug archive
         if: always()
