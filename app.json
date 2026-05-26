@@ -32,6 +32,12 @@
     "plugins": [
       "expo-asset",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5db91e73-6802-412a-a66e-7e4fbd9120e2"
+      }
+    },
+    "owner": "mjb-7"
   }
 }
