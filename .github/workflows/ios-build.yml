@@ -22,7 +22,11 @@ jobs:
         run: npm install
 
       - name: Fix permissions
-        run: chmod +x node_modules/.bin/*
+        run: |
+          chmod +x node_modules/.bin/*
+          find node_modules/react-native/scripts -name "*.sh" -exec chmod +x {} \;
+          find node_modules -name "codegen-artifacts.js" -exec echo "Found codegen: {}" \;
+          echo "Permissions fixed"
 
       - name: Generate iOS project
         run: npx expo prebuild -p ios --no-install --clean
@@ -32,23 +36,18 @@ jobs:
           cd ios
           pod install --repo-update
 
-      - name: Pre-build Codegen specs
-        run: |
-          cd ios
-          mkdir -p build/generated/ios
-          node ../node_modules/react-native/scripts/generate-codegen-artifacts.js \
-            --path .. \
-            --outputPath build/generated/ios 2>&1 || echo "Codegen pre-build skipped"
-
       - name: Build archive
         run: |
           cd ios
-          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          rm -rf ~/Library/Developer/Xcode/DerivedData
+          rm -rf build
           WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
           SCHEME="$(xcodebuild -list -workspace "$WORKSPACE" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")"
           echo "Workspace: $WORKSPACE, Scheme: $SCHEME"
           NODE_PATH="$(which node)"
           echo "Node binary: $NODE_PATH"
+          export RCT_NO_LAUNCH_PACKAGER=true
+          export NODE_OPTIONS="--max_old_space_size=8192"
           set -o pipefail
           xcodebuild archive \
             -workspace "$WORKSPACE" \
@@ -66,7 +65,7 @@ jobs:
           echo ""
           if [ "$XCODE_EXIT" -ne 0 ]; then
             echo "========== ALL FATAL ERRORS =========="
-            grep -i -E "(^| )(error:|Undefined symbol|CodeSign|Provisioning|CompileSwift|PhaseScriptExecution|Metro bundle|Hermes|React-Codegen|module not found|fatal error|ld:|clang:|linker command failed|ARCHIVE FAILED|The following build commands failed)" xcodebuild.log | head -100 || echo "(no matching patterns)"
+            grep -i -E "(error:|Undefined symbol|CodeSign|Provisioning|CompileSwift|PhaseScriptExecution|Metro bundle|Hermes|React-Codegen|module not found|fatal error|ld:|clang:|linker command failed|ARCHIVE FAILED|The following build commands failed)" xcodebuild.log | head -100 || echo "(no matching patterns)"
             echo ""
             echo "========== LAST 300 LINES (full, unfiltered) =========="
             tail -300 xcodebuild.log
