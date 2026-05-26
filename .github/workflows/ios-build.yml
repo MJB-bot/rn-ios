@@ -35,6 +35,7 @@ jobs:
           WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
           SCHEME="$(xcodebuild -list -workspace "$WORKSPACE" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")"
           echo "Workspace: $WORKSPACE, Scheme: $SCHEME"
+          set -o pipefail
           xcodebuild archive \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
@@ -43,7 +44,14 @@ jobs:
             -sdk iphoneos \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" 2>&1 | tee xcodebuild.log | grep -E "(error:|Error |FAILED|BUILD FAILED)" | head -20
+          XCODE_EXIT=${PIPESTATUS[0]}
+          echo "=== xcodebuild exit: $XCODE_EXIT ==="
+          if [ "$XCODE_EXIT" -ne 0 ]; then
+            echo "=== Last 50 lines of full log ==="
+            tail -50 xcodebuild.log
+          fi
 
       - name: Debug archive
         if: always()
