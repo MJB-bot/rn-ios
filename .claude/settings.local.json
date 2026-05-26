@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm --version)",
+      "Bash(npx expo *)",
+      "Bash(python3 *)",
+      "Bash(node *)",
+      "Bash(curl -s -H \"Authorization: Bearer figu_LQzBETsrKhrNxakrR7PLGi2f2NoObuPGAtJgmzPo\" \"https://api.figma.com/v1/files/88Tr6RoAbADxqTQo9s4Uef/nodes?ids=3-39&depth=3\")",
+      "Bash(curl -s -H \"Authorization: Bearer figu_t5za6wOtOyBW_yIm-OY6rx50nnzTfYPSyOxcUPVo\" \"https://api.figma.com/v1/files/88Tr6RoAbADxqTQo9s4Uef?depth=2\")",
+      "Bash(curl -s -X POST \"https://mcp.figma.com/mcp\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer figu_LQzBETsrKhrNxakrR7PLGi2f2NoObuPGAtJgmzPo\" -d '{\"jsonrpc\":\"2.0\",\"method\":\"get_design_context\",\"params\":{\"fileKey\":\"88Tr6RoAbADxqTQo9s4Uef\",\"nodeId\":\"3:39\"},\"id\":1}')",
+      "Bash(curl *)",
+      "Bash(npx tsc *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 77740 //F)",
+      "Bash(taskkill //PID 92852 //F)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8081)",
+      "Bash(taskkill *)"
+    ]
+  }
+}
