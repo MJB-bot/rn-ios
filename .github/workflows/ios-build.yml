@@ -32,6 +32,14 @@ jobs:
           cd ios
           pod install --repo-update
 
+      - name: Pre-build Codegen specs
+        run: |
+          cd ios
+          mkdir -p build/generated/ios
+          node ../node_modules/react-native/scripts/generate-codegen-artifacts.js \
+            --path .. \
+            --outputPath build/generated/ios 2>&1 || echo "Codegen pre-build skipped"
+
       - name: Build archive
         run: |
           cd ios
@@ -39,6 +47,8 @@ jobs:
           WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
           SCHEME="$(xcodebuild -list -workspace "$WORKSPACE" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")"
           echo "Workspace: $WORKSPACE, Scheme: $SCHEME"
+          NODE_PATH="$(which node)"
+          echo "Node binary: $NODE_PATH"
           set -o pipefail
           xcodebuild archive \
             -workspace "$WORKSPACE" \
@@ -47,6 +57,7 @@ jobs:
             -archivePath ../ios.xcarchive \
             -sdk iphoneos \
             -UseModernBuildSystem=NO \
+            NODE_BINARY="$NODE_PATH" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO 2>&1 | tee xcodebuild.log | tail -60
           XCODE_EXIT=${PIPESTATUS[0]}
