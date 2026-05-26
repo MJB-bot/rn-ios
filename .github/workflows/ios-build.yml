@@ -32,15 +32,9 @@ jobs:
       - name: Build archive
         run: |
           cd ios
-          echo "=== Workspace files ==="
-          find . -maxdepth 1 -name '*.xcworkspace'
-          echo "=== Available schemes ==="
-          xcodebuild -list -workspace "$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)" -json 2>/dev/null | python3 -c "import sys,json; data=json.load(sys.stdin); [print(s) for s in data['workspace']['schemes']]"
-          echo "=== Building ==="
           WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
           SCHEME="$(xcodebuild -list -workspace "$WORKSPACE" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")"
-          echo "Workspace: $WORKSPACE"
-          echo "Scheme: $SCHEME"
+          echo "Workspace: $WORKSPACE, Scheme: $SCHEME"
           xcodebuild archive \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
@@ -49,7 +43,14 @@ jobs:
             -sdk iphoneos \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO 2>&1 | tail -50
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Debug archive
+        if: always()
+        run: |
+          echo "=== Archive contents ==="
+          find ios.xcarchive -type f -name "*.app" 2>/dev/null || echo "No .app found"
+          find ios.xcarchive -maxdepth 3 -type d 2>/dev/null || echo "No archive directory"
 
       - name: Package IPA
         run: |
