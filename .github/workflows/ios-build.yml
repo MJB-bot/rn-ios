@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,6 +15,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Select Xcode 16.4
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
       - name: Install dependencies
         run: npm install
 
@@ -22,12 +25,12 @@ jobs:
         run: chmod +x node_modules/.bin/*
 
       - name: Generate iOS project
-        run: npx expo prebuild -p ios --no-install
+        run: npx expo prebuild -p ios --no-install --clean
 
       - name: Install CocoaPods
         run: |
           cd ios
-          pod install
+          pod install --repo-update
 
       - name: Build archive
         run: |
@@ -42,10 +45,8 @@ jobs:
             -configuration Release \
             -archivePath ../ios.xcarchive \
             -sdk iphoneos \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM="" 2>&1 | tee xcodebuild.log | grep -E "(error:|Error |FAILED|BUILD FAILED)" | head -20
+            CODE_SIGNING_REQUIRED=NO 2>&1 | tee xcodebuild.log | grep -E "(error:|Error |FAILED|BUILD FAILED)" | head -20
           XCODE_EXIT=${PIPESTATUS[0]}
           echo "=== xcodebuild exit: $XCODE_EXIT ==="
           if [ "$XCODE_EXIT" -ne 0 ]; then

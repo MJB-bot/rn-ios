@@ -37,7 +37,16 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.1",
+            "newArchEnabled": false
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {
