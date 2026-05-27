@@ -24,7 +24,7 @@ jobs:
       - name: Fix permissions
         run: |
           chmod +x node_modules/.bin/*
-          find node_modules/react-native/scripts -name "*.sh" -exec chmod +x {} \;
+          find node_modules -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
           echo "Permissions fixed"
 
       - name: Generate iOS project
