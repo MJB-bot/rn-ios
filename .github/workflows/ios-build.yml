@@ -25,22 +25,29 @@ jobs:
         run: |
           chmod +x node_modules/.bin/*
           find node_modules/react-native/scripts -name "*.sh" -exec chmod +x {} \;
-          find node_modules -name "codegen-artifacts.js" -exec echo "Found codegen: {}" \;
           echo "Permissions fixed"
 
       - name: Generate iOS project
         run: npx expo prebuild -p ios --no-install --clean
 
-      - name: Install CocoaPods
+      - name: Install CocoaPods with codegen
         run: |
           cd ios
+          rm -rf ~/Library/Developer/Xcode/DerivedData
+          export RCT_NEW_ARCH_ENABLED=1
+          export NODE_BINARY="$(which node)"
           pod install --repo-update
+
+      - name: Verify codegen output
+        run: |
+          echo "=== Generated codegen files ==="
+          find ios/build/generated -type f 2>/dev/null | head -30 || echo "WARNING: No codegen files generated!"
+          echo "=== Codegen file count ==="
+          find ios/build/generated -type f 2>/dev/null | wc -l || echo "0"
 
       - name: Build archive
         run: |
           cd ios
-          rm -rf ~/Library/Developer/Xcode/DerivedData
-          rm -rf build
           WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' | head -1)"
           SCHEME="$(xcodebuild -list -workspace "$WORKSPACE" -json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['workspace']['schemes'][0])")"
           echo "Workspace: $WORKSPACE, Scheme: $SCHEME"
